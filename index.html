@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>جدول زمانی پایان‌نامه | ارکیده فالانوپسیس</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1:#f3f0ff;
+    --bg-2:#eef7f3;
+    --card-bg:#ffffff;
+    --text:#20232b;
+    --muted:#6b7280;
+    --line:#e8e7f3;
+
+    --green-1:#34d399; --green-2:#059669;
+    --purple-1:#a78bfa; --purple-2:#7c3aed;
+    --amber-1:#fbbf24; --amber-2:#d97706;
+    --rose-1:#f472b6; --rose-2:#db2777;
+
+    --radius-lg:20px;
+    --radius-md:14px;
+    --shadow-soft:0 10px 30px -12px rgba(45,30,80,0.18);
+    --shadow-hover:0 16px 40px -14px rgba(45,30,80,0.28);
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Vazirmatn', Tahoma, sans-serif;
+    background:
+      radial-gradient(1200px 500px at 10% -10%, var(--bg-1), transparent 60%),
+      radial-gradient(1200px 500px at 100% 0%, var(--bg-2), transparent 60%),
+      #f7f7fb;
+    color:var(--text);
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+
+  .wrap{max-width:1180px; margin:0 auto;}
+
+  /* ---------- Header ---------- */
+  .page-header{
+    text-align:center;
+    margin-bottom:28px;
+    animation: fadeDown .7s ease both;
+  }
+  .badge{
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg, var(--rose-1), var(--purple-1));
+    color:#fff; font-weight:600; font-size:13px;
+    padding:6px 16px; border-radius:999px;
+    box-shadow:var(--shadow-soft);
+    margin-bottom:14px;
+  }
+  h1{
+    font-size:clamp(22px, 3.4vw, 34px);
+    font-weight:800;
+    line-height:1.6;
+    background:linear-gradient(90deg,#4c1d95,#7c3aed 40%, #db2777 75%, #be185d);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .subtitle{
+    margin-top:10px;
+    color:var(--muted);
+    font-size:clamp(13px,1.6vw,16px);
+    max-width:800px;
+    margin-inline:auto;
+    line-height:2;
+  }
+
+  /* ---------- Stats ---------- */
+  .stats{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+    margin-bottom:30px;
+  }
+  .stat-card{
+    background:var(--card-bg);
+    border-radius:var(--radius-md);
+    padding:18px 16px;
+    box-shadow:var(--shadow-soft);
+    border:1px solid var(--line);
+    text-align:center;
+    transition:transform .25s ease, box-shadow .25s ease;
+    animation: fadeUp .7s ease both;
+  }
+  .stat-card:hover{transform:translateY(-4px); box-shadow:var(--shadow-hover);}
+  .stat-card .icon{font-size:26px; margin-bottom:8px; display:block;}
+  .stat-card .value{font-weight:800; font-size:16px; margin-bottom:4px;}
+  .stat-card .label{font-size:12.5px; color:var(--muted);}
+
+  /* ---------- Chart Card ---------- */
+  .chart-card{
+    background:var(--card-bg);
+    border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-soft);
+    border:1px solid var(--line);
+    padding:26px 22px 22px;
+    margin-bottom:26px;
+    animation: fadeUp .8s ease both;
+  }
+  .chart-card-head{
+    display:flex; align-items:center; justify-content:space-between;
+    flex-wrap:wrap; gap:10px;
+    margin-bottom:20px;
+  }
+  .chart-card-head h2{
+    font-size:18px; font-weight:800;
+  }
+  .chart-card-head p{
+    font-size:12.5px; color:var(--muted);
+  }
+
+  .scroll-area{
+    overflow-x:auto;
+    padding-bottom:6px;
+  }
+  .scroll-area::-webkit-scrollbar{height:8px;}
+  .scroll-area::-webkit-scrollbar-thumb{background:#e2ddf7; border-radius:10px;}
+
+  .gantt{
+    display:grid;
+    grid-template-columns: 210px repeat(16, minmax(58px, 1fr));
+    min-width:1050px;
+    position:relative;
+    row-gap:6px;
+  }
+
+  .row-bg{
+    border-radius:10px;
+  }
+  .row-bg.odd{background:#faf9ff;}
+  .row-bg.even{background:transparent;}
+
+  .year-row .cell, .month-row .cell{
+    display:flex; align-items:center; justify-content:center;
+  }
+  .year-row .cell{
+    font-size:12px; font-weight:700;
+    color:#5b21b6;
+    background:linear-gradient(180deg, rgba(124,58,237,.08), rgba(124,58,237,.02));
+    border-radius:10px 10px 0 0;
+    padding:6px 0;
+  }
+  .year-row .cell.y2{
+    color:#be185d;
+    background:linear-gradient(180deg, rgba(219,39,119,.08), rgba(219,39,119,.02));
+  }
+  .month-row .cell{
+    font-size:12px; font-weight:600; color:#374151;
+    padding:8px 2px;
+    border-bottom:2px solid var(--line);
+  }
+  .month-row .cell.empty-month{
+    color:#b7bcc7;
+    font-style:italic;
+  }
+  .divider-left{
+    border-left:2px dashed #d9d5f5 !important;
+  }
+
+  .row-label{
+    display:flex; align-items:center; gap:10px;
+    font-size:13px; font-weight:700;
+    padding:10px 12px;
+  }
+  .row-label .dot{
+    width:12px; height:12px; border-radius:4px; flex:none;
+  }
+
+  .bar-track{
+    position:relative;
+    display:flex;
+    align-items:center;
+    padding:8px 4px;
+  }
+  .bar{
+    height:34px;
+    width:100%;
+    border-radius:10px;
+    color:#fff;
+    font-size:12px;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    box-shadow:0 6px 16px -6px rgba(0,0,0,.35);
+    cursor:pointer;
+    transform:scaleX(0);
+    transform-origin:right center;
+    transition:transform .8s cubic-bezier(.2,.8,.2,1), filter .2s ease, box-shadow .2s ease;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .bar.show{transform:scaleX(1);}
+  .bar:hover, .bar.active-hover{
+    filter:brightness(1.08);
+    box-shadow:0 10px 22px -6px rgba(0,0,0,.45);
+  }
+
+  .empty-cell-note{
+    grid-column: 13 / 14;
+    align-self:center;
+    justify-self:center;
+    font-size:10.5px;
+    color:#b7bcc7;
+  }
+
+  /* Tooltip */
+  .tooltip{
+    position:fixed;
+    z-index:50;
+    background:#1f2430;
+    color:#fff;
+    padding:10px 14px;
+    border-radius:10px;
+    font-size:12.5px;
+    line-height:1.9;
+    max-width:260px;
+    box-shadow:0 12px 30px -10px rgba(0,0,0,.5);
+    opacity:0;
+    pointer-events:none;
+    transform:translateY(4px);
+    transition:opacity .15s ease, transform .15s ease;
+  }
+  .tooltip.show{opacity:1; transform:translateY(0);}
+  .tooltip b{color:#fbbf24;}
+
+  /* ---------- Legend ---------- */
+  .legend{
+    display:flex; flex-wrap:wrap; gap:14px;
+    justify-content:center;
+    margin-top:18px;
+    padding-top:16px;
+    border-top:1px dashed var(--line);
+  }
+  .legend-item{
+    display:flex; align-items:center; gap:8px;
+    font-size:12.5px; font-weight:600;
+    cursor:pointer;
+    padding:6px 12px;
+    border-radius:999px;
+    background:#f8f7fd;
+    border:1px solid var(--line);
+    transition:all .2s ease;
+  }
+  .legend-item:hover, .legend-item.active-legend{
+    background:#efe9ff;
+    transform:translateY(-2px);
+  }
+  .legend-item .dot{width:10px; height:10px; border-radius:50%;}
+
+  .esfand-note{
+    text-align:center;
+    font-size:12px;
+    color:var(--muted);
+    margin-top:14px;
+    background:#fff8f0;
+    border:1px dashed #f0d9b5;
+    padding:10px 14px;
+    border-radius:12px;
+  }
+
+  /* ---------- Detail Cards ---------- */
+  .details-title{
+    text-align:center;
+    font-size:18px;
+    font-weight:800;
+    margin:34px 0 18px;
+  }
+  .details-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:16px;
+  }
+  .detail-card{
+    background:var(--card-bg);
+    border-radius:var(--radius-md);
+    padding:18px;
+    border:1px solid var(--line);
+    border-inline-start:5px solid transparent;
+    box-shadow:var(--shadow-soft);
+    transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+    animation: fadeUp .9s ease both;
+  }
+  .detail-card:hover, .detail-card.active-hover{
+    transform:translateY(-5px);
+    box-shadow:var(--shadow-hover);
+  }
+  .detail-card .head{
+    display:flex; align-items:center; gap:10px;
+    margin-bottom:10px;
+  }
+  .detail-card .icon-badge{
+    width:38px; height:38px; border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:18px; color:#fff; flex:none;
+  }
+  .detail-card h3{font-size:14px; font-weight:700; line-height:1.6;}
+  .detail-card .range{
+    font-size:11.5px; color:var(--muted); margin-bottom:8px;
+    display:inline-block;
+    background:#f5f4fb;
+    padding:3px 10px;
+    border-radius:999px;
+  }
+  .detail-card p{
+    font-size:12.5px; color:#4b5160; line-height:1.9;
+  }
+
+  footer{
+    text-align:center;
+    margin-top:34px;
+    font-size:11.5px;
+    color:#9aa0ab;
+  }
+
+  @keyframes fadeDown{
+    from{opacity:0; transform:translateY(-16px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  @keyframes fadeUp{
+    from{opacity:0; transform:translateY(18px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .details-grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width: 560px){
+    .stats{grid-template-columns:repeat(2,1fr);}
+    .details-grid{grid-template-columns:1fr;}
+    .chart-card{padding:18px 12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="page-header">
+    <div class="badge">🌸 پایان‌نامه کارشناسی ارشد / دکتری</div>
+    <h1>جدول زمانی اجرای پایان‌نامه<br>مقایسه اثر محیط‌های کشت مبتنی بر پیش‌بینی هوش مصنوعی و محیط‌های کشت تغییریافته<br>بر کیفیت رشد گیاهچه ارکیده فالانوپسیس (Phalaenopsis)</h1>
+    <p class="subtitle">این نمودار، برنامه زمان‌بندی اجرای پروژه را از شروع کشت گیاهچه‌ها تا آماده‌سازی جلسه دفاع، به تفکیک ماه و فاز پژوهشی نمایش می‌دهد.</p>
+  </div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="chart-card">
+    <div class="chart-card-head">
+      <div>
+        <h2>📅 نمودار گانت فازهای پژوهش</h2>
+        <p>روی هر نوار یا هر آیتم راهنما حرکت کنید تا جزئیات بازه زمانی نمایش داده شود.</p>
+      </div>
+    </div>
+
+    <div class="scroll-area">
+      <div class="gantt" id="gantt"></div>
+    </div>
+
+    <div class="esfand-note">
+      ⏸️ توضیح: ماه <b>اسفند</b> به‌عنوان بازه تعطیلات نوروزی و فاصله بین پایان اندازه‌گیری‌ها و آغاز تحلیل داده‌ها، فاقد فعالیت اجرایی مشخص در نظر گرفته شده است.
+    </div>
+
+    <div class="legend" id="legend"></div>
+  </div>
+
+  <div class="details-title">🔎 شرح فازهای پژوهش</div>
+  <div class="details-grid" id="details"></div>
+
+  <footer>طراحی شده برای مصورسازی برنامه زمانی پژوهش — قابل ویرایش بر اساس تقویم واقعی اجرای طرح</footer>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+  // ---------------- Data ----------------
+  const months = [
+    {n:"اردیبهشت", y:1}, {n:"خرداد", y:1}, {n:"تیر", y:1}, {n:"مرداد", y:1},
+    {n:"شهریور", y:1}, {n:"مهر", y:1}, {n:"آبان", y:1}, {n:"آذر", y:1},
+    {n:"دی", y:1}, {n:"بهمن", y:1}, {n:"اسفند", y:1},
+    {n:"فروردین", y:2}, {n:"اردیبهشت", y:2}, {n:"خرداد", y:2}, {n:"تیر", y:2}, {n:"مرداد", y:2}
+  ]; // index 0..15 => month number 1..16
+
+  const phases = [
+    {
+      title:"کاشت و نگهداری گیاهچه‌های ارکیده فالانوپسیس",
+      start:1, end:8, // اردیبهشت تا آذر
+      icon:"🌱",
+      gradient:"linear-gradient(135deg,var(--green-1),var(--green-2))",
+      dot:"var(--green-2)",
+      range:"اردیبهشت تا آذر (۸ ماه)",
+      desc:"کشت هم‌زمان گیاهچه‌ها در محیط کشت طراحی‌شده با کمک مدل پیش‌بینی هوش مصنوعی و محیط کشت تغییریافته مرسوم، به‌همراه پایش دوره‌ای شرایط رشد."
+    },
+    {
+      title:"اندازه‌گیری‌های مورفولوژیک و فتوسنتزی",
+      start:9, end:10, // دی و بهمن
+      icon:"🔬",
+      gradient:"linear-gradient(135deg,var(--purple-1),var(--purple-2))",
+      dot:"var(--purple-2)",
+      range:"دی و بهمن (۲ ماه)",
+      desc:"ثبت شاخص‌های مورفولوژیک (طول برگ، تعداد ریشه، وزن‌تر و خشک) و پارامترهای فتوسنتزی (کلروفیل، فلورسانس، نرخ فتوسنتز) در دو گروه تیمار."
+    },
+    {
+      title:"تحلیل آماری و پردازش داده‌ها",
+      start:12, end:14, // فروردین، اردیبهشت، خرداد سال دوم
+      icon:"📊",
+      gradient:"linear-gradient(135deg,var(--amber-1),var(--amber-2))",
+      dot:"var(--amber-2)",
+      range:"فروردین تا خرداد سال دوم (۳ ماه)",
+      desc:"تحلیل آماری داده‌های جمع‌آوری‌شده، مقایسه دو گروه تیمار با آزمون‌های آماری مناسب و تفسیر نتایج در چارچوب اهداف پژوهش."
+    },
+    {
+      title:"نگارش پایان‌نامه و آماده‌سازی جلسه دفاع",
+      start:15, end:16, // تیر و مرداد سال دوم
+      icon:"📝",
+      gradient:"linear-gradient(135deg,var(--rose-1),var(--rose-2))",
+      dot:"var(--rose-2)",
+      range:"تیر و مرداد سال دوم (۲ ماه)",
+      desc:"تدوین فصول پایان‌نامه، تهیه اسلایدهای ارائه و آماده‌سازی نهایی جهت برگزاری جلسه دفاع."
+    }
+  ];
+
+  // ---------------- Stats ----------------
+  const statsData = [
+    {icon:"⏳", value:"۱۶ ماه", label:"بازه کلی اجرای پروژه"},
+    {icon:"🧩", value:"۴ فاز اصلی", label:"از کاشت تا دفاع"},
+    {icon:"🌸", value:"ارکیده فالانوپسیس", label:"گونه گیاهی مورد مطالعه"},
+    {icon:"🤖", value:"AI در برابر سنتی", label:"مقایسه دو محیط کشت"},
+  ];
+  const statsEl = document.getElementById('stats');
+  statsData.forEach((s,i)=>{
+    const d = document.createElement('div');
+    d.className='stat-card';
+    d.style.animationDelay = (i*0.08)+'s';
+    d.innerHTML = `<span class="icon">${s.icon}</span><div class="value">${s.value}</div><div class="label">${s.label}</div>`;
+    statsEl.appendChild(d);
+  });
+
+  // ---------------- Gantt ----------------
+  const gantt = document.getElementById('gantt');
+  const totalCols = months.length; // 16
+  const rowCount = phases.length;
+
+  // Row background bands (for header rows + each phase row)
+  function addRowBg(rowIndex, cls){
+    const bg = document.createElement('div');
+    bg.className = 'row-bg ' + cls;
+    bg.style.gridColumn = '1 / -1';
+    bg.style.gridRow = rowIndex;
+    gantt.appendChild(bg);
+  }
+  for(let i=0;i<rowCount;i++){
+    addRowBg(3+i, i%2===0 ? 'odd':'even');
+  }
+
+  // Year row
+  const yearRow = document.createElement('div');
+  yearRow.style.display='contents';
+  gantt.appendChild(yearRow);
+
+  const emptyLabelTop = document.createElement('div');
+  emptyLabelTop.style.gridRow = 1;
+  emptyLabelTop.style.gridColumn = 1;
+  gantt.appendChild(emptyLabelTop);
+
+  const y1Cell = document.createElement('div');
+  y1Cell.className='cell';
+  y1Cell.textContent = '📆 سال اول';
+  y1Cell.style.gridRow = 1;
+  y1Cell.style.gridColumn = '2 / 13'; // months 1..11 => cols 2..12
+  y1Cell.parentClass;
+  const yearRowWrap1 = document.createElement('div');
+
+  // Simplify: append directly with classnames using a wrapper "year-row" via manual class assignment
+  y1Cell.classList.add('year-row-cell');
+  gantt.appendChild(y1Cell);
+
+  const y2Cell = document.createElement('div');
+  y2Cell.className='cell y2';
+  y2Cell.textContent = '📆 سال دوم';
+  y2Cell.style.gridRow = 1;
+  y2Cell.style.gridColumn = '13 / 18'; // months 12..16 => cols 13..17
+  gantt.appendChild(y2Cell);
+
+  // add class hooks for "year-row" styling since we used .cell selector scoped to .year-row .cell
+  // fix: wrap with proper parent class using data attribute + generic rule
+  y1Cell.closest && null;
+
+  // Month row
+  const emptyLabelMid = document.createElement('div');
+  emptyLabelMid.style.gridRow = 2;
+  emptyLabelMid.style.gridColumn = 1;
+  emptyLabelMid.className='row-label';
+  emptyLabelMid.innerHTML = '<span style="color:#9aa0ab;font-size:12px;">فاز / ماه</span>';
+  gantt.appendChild(emptyLabelMid);
+
+  months.forEach((m, idx)=>{
+    const col = idx + 2; // month index(1-based)=idx+1 => col = month+1
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    cell.textContent = m.n;
+    cell.style.gridRow = 2;
+    cell.style.gridColumn = col;
+    cell.style.fontWeight = 600;
+    cell.style.padding = '8px 2px';
+    cell.style.borderBottom = '2px solid #e8e7f3';
+    cell.style.fontSize = '12px';
+    if(idx === 10){ cell.classList.add('empty-month'); } // esfand
+    if(col === 13){ cell.classList.add('divider-left'); }
+    gantt.appendChild(cell);
+  });
+
+  // Re-style year cells properly (since custom classes above used .year-row .cell scope not matching structure)
+  y1Cell.style.fontWeight='700';
+  y1Cell.style.fontSize='12px';
+  y1Cell.style.color='#5b21b6';
+  y1Cell.style.background='linear-gradient(180deg, rgba(124,58,237,.08), rgba(124,58,237,.02))';
+  y1Cell.style.borderRadius='10px 10px 0 0';
+  y1Cell.style.padding='6px 0';
+  y1Cell.style.display='flex';
+  y1Cell.style.alignItems='center';
+  y1Cell.style.justifyContent='center';
+
+  y2Cell.style.fontWeight='700';
+  y2Cell.style.fontSize='12px';
+  y2Cell.style.color='#be185d';
+  y2Cell.style.background='linear-gradient(180deg, rgba(219,39,119,.08), rgba(219,39,119,.02))';
+  y2Cell.style.borderRadius='10px 10px 0 0';
+  y2Cell.style.padding='6px 0';
+  y2Cell.style.display='flex';
+  y2Cell.style.alignItems='center';
+  y2Cell.style.justifyContent='center';
+  y2Cell.classList.add('divider-left');
+
+  // Phase rows
+  const tooltip = document.getElementById('tooltip');
+
+  phases.forEach((p, i)=>{
+    const row = 3 + i;
+
+    // label
+    const label = document.createElement('div');
+    label.className = 'row-label';
+    label.innerHTML = `<span class="dot" style="background:${p.dot}"></span><span>${p.title}</span>`;
+    label.style.gridRow = row;
+    label.style.gridColumn = 1;
+    gantt.appendChild(label);
+
+    // track (full width area for the row, month columns)
+    const track = document.createElement('div');
+    track.className = 'bar-track';
+    track.style.gridRow = row;
+    track.style.gridColumn = `${p.start+1} / ${p.end+2}`;
+
+    const bar = document.createElement('div');
+    bar.className = 'bar';
+    bar.style.background = p.gradient;
+    bar.dataset.index = i;
+    bar.innerHTML = `<span>${p.icon}</span><span>${p.title.split(' ').slice(0,3).join(' ')}...</span>`;
+
+    bar.addEventListener('mouseenter', (e)=>{
+      showTooltip(e, p);
+      highlight(i, true);
+    });
+    bar.addEventListener('mousemove', (e)=> moveTooltip(e));
+    bar.addEventListener('mouseleave', ()=>{
+      hideTooltip();
+      highlight(i, false);
+    });
+
+    track.appendChild(bar);
+    gantt.appendChild(track);
+  });
+
+  // trigger bar grow animation
+  requestAnimationFrame(()=>{
+    setTimeout(()=>{
+      document.querySelectorAll('.bar').forEach((b,idx)=>{
+        setTimeout(()=> b.classList.add('show'), idx*150);
+      });
+    }, 150);
+  });
+
+  function showTooltip(e, p){
+    tooltip.innerHTML = `<b>${p.icon} ${p.title}</b><br>🗓️ بازه زمانی: ${p.range}<br>${p.desc}`;
+    tooltip.classList.add('show');
+    moveTooltip(e);
+  }
+  function moveTooltip(e){
+    const pad = 16;
+    let x = e.clientX + pad;
+    let y = e.clientY + pad;
+    const tw = tooltip.offsetWidth || 240;
+    if(x + tw > window.innerWidth - 10) x = e.clientX - tw - pad;
+    tooltip.style.left = x + 'px';
+    tooltip.style.top = y + 'px';
+  }
+  function hideTooltip(){
+    tooltip.classList.remove('show');
+  }
+
+  function highlight(index, state){
+    document.querySelectorAll(`.bar[data-index="${index}"]`).forEach(el=> el.classList.toggle('active-hover', state));
+    document.querySelectorAll(`.detail-card[data-index="${index}"]`).forEach(el=> el.classList.toggle('active-hover', state));
+    document.querySelectorAll(`.legend-item[data-index="${index}"]`).forEach(el=> el.classList.toggle('active-legend', state));
+  }
+
+  // ---------------- Legend ----------------
+  const legendEl = document.getElementById('legend');
+  phases.forEach((p,i)=>{
+    const item = document.createElement('div');
+    item.className='legend-item';
+    item.dataset.index = i;
+    item.innerHTML = `<span class="dot" style="background:${p.dot}"></span><span>${p.icon} ${p.title}</span>`;
+    item.addEventListener('mouseenter', ()=> highlight(i, true));
+    item.addEventListener('mouseleave', ()=> highlight(i, false));
+    legendEl.appendChild(item);
+  });
+
+  // ---------------- Detail cards ----------------
+  const detailsEl = document.getElementById('details');
+  phases.forEach((p,i)=>{
+    const card = document.createElement('div');
+    card.className='detail-card';
+    card.dataset.index = i;
+    card.style.borderInlineStartColor = p.dot;
+    card.style.animationDelay = (i*0.1)+'s';
+    card.innerHTML = `
+      <div class="head">
+        <div class="icon-badge" style="background:${p.gradient}">${p.icon}</div>
+        <h3>${p.title}</h3>
+      </div>
+      <span class="range">${p.range}</span>
+      <p>${p.desc}</p>
+    `;
+    card.addEventListener('mouseenter', ()=> highlight(i, true));
+    card.addEventListener('mouseleave', ()=> highlight(i, false));
+    detailsEl.appendChild(card);
+  });
+</script>
+</body>
+</html>
